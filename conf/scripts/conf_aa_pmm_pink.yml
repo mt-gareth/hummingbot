@@ -1,0 +1,15 @@
+markets:
+  polkadex:
+    - PINK-USDT
+candles_config: [ ]
+controllers_config: [ ]
+config_update_interval: 60
+script_file_name: aa_pmm_pink.py
+order_amount_quote: 22
+executor_refresh_time: 300
+leverage: 1
+position_mode: HEDGE
+stop_loss: 0.03
+take_profit: 0.01
+time_limit: 2700
+take_profit_order_type: 2

@@ -404,7 +404,10 @@ class StrategyV2Base(ScriptStrategyBase):
             for close_type, value in performance_report.close_type_counts.items():
                 global_close_type_counts[close_type] = global_close_type_counts.get(close_type, 0) + value
 
-        main_executors_list = self.get_executors_by_controller("main")
+        main_executors_list = self.get_all_executors()
+        main_executors_list = self.filter_executors(
+            executors=main_executors_list,
+            filter_func=lambda x: x.status != SmartComponentStatus.TERMINATED )
         if len(main_executors_list) > 0:
             extra_info.append("\n\nMain Controller Executors:")
             main_executors_df = self.executors_info_to_df(main_executors_list)

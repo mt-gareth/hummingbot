@@ -84,6 +84,11 @@ class PolkadexDataSource:
         self._events_listening_tasks = []
         self._assets_map: Dict[str, str] = {}
 
+        self._query_executor_read_only = GrapQLQueryExecutor(
+            auth=gql.transport.appsync_auth.AppSyncJWTAuthentication(self.netloc_host, "READ_ONLY"),
+            domain=self._domain,
+            throttler=self._throttler
+        )
         self._query_executor = GrapQLQueryExecutor(
             auth=self._auth,
             domain=self._domain,
@@ -151,7 +156,7 @@ class PolkadexDataSource:
             self.logger().info("Started Polkadex_data_source")
 
     async def check_status(self):
-        self.logger().info(f"Polkadex status is checked. self._query_executor._restart_initialization: {self._query_executor._restart_initialization}, self.trading_pairs {self._trading_pairs}")
+        # self.logger().info(f"Polkadex status is checked. self._query_executor._restart_initialization: {self._query_executor._restart_initialization}, self.trading_pairs {self._trading_pairs}")
         if self._query_executor._restart_initialization:
             self.logger().info("Polkadex status check - Need to reinitiate the query_executor")
             await self.stop()
@@ -212,7 +217,7 @@ class PolkadexDataSource:
         return await self._query_executor.list_open_orders_by_main_account(main_account=await self.user_main_address())
 
     async def assets_map(self) -> Dict[str, str]:
-        all_assets = await self._query_executor.all_assets()
+        all_assets = await self._query_executor_read_only.all_assets()
 
         self._assets_map = {
             asset["asset_id"]: polkadex_utils.normalized_asset_name(
@@ -230,7 +235,7 @@ class PolkadexDataSource:
         symbols_map = bidict()
         assets_map = await self.assets_map()
 
-        all_markets = await self._query_executor.all_markets()
+        all_markets = await self._query_executor_read_only.all_markets()
 
         for market_info in all_markets:
             try:
@@ -243,7 +248,7 @@ class PolkadexDataSource:
         return symbols_map
 
     async def all_trading_rules(self) -> List[TradingRule]:
-        all_markets = await self._query_executor.all_markets()
+        all_markets = await self._query_executor_read_only.all_markets()
 
         trading_rules = []
         for market_info in all_markets:
@@ -279,7 +284,7 @@ class PolkadexDataSource:
         return trading_rules
 
     async def order_book_snapshot(self, market_symbol: str, trading_pair: str) -> OrderBookMessage:
-        orderbook_items = await self._query_executor.get_orderbook(market_symbol)
+        orderbook_items = await self._query_executor_read_only.get_orderbook(market_symbol)
 
         timestamp = self._time()
         update_id = -1

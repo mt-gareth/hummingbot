@@ -7,6 +7,7 @@ from hummingbot.smart_components.executors.dca_executor.data_types import DCAExe
 from hummingbot.smart_components.executors.position_executor.data_types import PositionExecutorConfig
 from hummingbot.smart_components.executors.twap_executor.data_types import TWAPExecutorConfig
 from hummingbot.smart_components.executors.xemm_executor.data_types import XEMMExecutorConfig
+from hummingbot.smart_components.executors.mm_executor.data_types import MMExecutorConfig
 
 
 class ExecutorAction(BaseModel):
@@ -20,7 +21,7 @@ class CreateExecutorAction(ExecutorAction):
     """
     Action to create an executor.
     """
-    executor_config: Union[PositionExecutorConfig, DCAExecutorConfig, XEMMExecutorConfig, ArbitrageExecutorConfig, TWAPExecutorConfig]
+    executor_config: Union[PositionExecutorConfig, DCAExecutorConfig, XEMMExecutorConfig, ArbitrageExecutorConfig, TWAPExecutorConfig, MMExecutorConfig]
 
 
 class StopExecutorAction(ExecutorAction):

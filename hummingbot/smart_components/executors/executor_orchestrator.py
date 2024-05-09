@@ -8,6 +8,8 @@ from hummingbot.smart_components.executors.arbitrage_executor.arbitrage_executor
 from hummingbot.smart_components.executors.arbitrage_executor.data_types import ArbitrageExecutorConfig
 from hummingbot.smart_components.executors.dca_executor.data_types import DCAExecutorConfig
 from hummingbot.smart_components.executors.dca_executor.dca_executor import DCAExecutor
+from hummingbot.smart_components.executors.mm_executor.data_types import MMExecutorConfig
+from hummingbot.smart_components.executors.mm_executor.mm_executor import MMExecutor
 from hummingbot.smart_components.executors.position_executor.data_types import PositionExecutorConfig
 from hummingbot.smart_components.executors.position_executor.position_executor import PositionExecutor
 from hummingbot.smart_components.executors.twap_executor.data_types import TWAPExecutorConfig
@@ -98,6 +100,8 @@ class ExecutorOrchestrator:
             executor = TWAPExecutor(self.strategy, executor_config, self.executors_update_interval)
         elif isinstance(executor_config, XEMMExecutorConfig):
             executor = XEMMExecutor(self.strategy, executor_config, self.executors_update_interval)
+        elif isinstance(executor_config, MMExecutorConfig):
+            executor = MMExecutor(self.strategy, executor_config, self.executors_update_interval)
         else:
             raise ValueError("Unsupported executor config type")
 
