@@ -59,6 +59,7 @@ class PolkadexDataSource:
         self._user_main_address = None
         self._seed_phrase = seed_phrase
         self._trading_pairs = trading_pairs
+        self._auth_read_only = gql.transport.appsync_auth.AppSyncJWTAuthentication(self.netloc_host, "READ_ONLY")
         if seed_phrase is not None and len(seed_phrase) > 0:
             self._keypair = Keypair.create_from_mnemonic(
                 seed_phrase, CONSTANTS.POLKADEX_SS58_PREFIX, KeypairType.SR25519
@@ -67,7 +68,7 @@ class PolkadexDataSource:
             self._auth = gql.transport.appsync_auth.AppSyncJWTAuthentication(self.netloc_host, self._user_proxy_address)
         else:
             self._user_proxy_address = "READ_ONLY"
-            self._auth = gql.transport.appsync_auth.AppSyncJWTAuthentication(self.netloc_host, "READ_ONLY")
+            self._auth = self._auth_read_only
 
         # Load Polkadex Runtime Config
         self._runtime_config = RuntimeConfiguration()
@@ -84,11 +85,8 @@ class PolkadexDataSource:
         self._events_listening_tasks = []
         self._assets_map: Dict[str, str] = {}
 
-        self._query_executor = GrapQLQueryExecutor(
-            auth=self._auth,
-            domain=self._domain,
-            throttler=self._throttler
-        )
+        self._query_executor = GrapQLQueryExecutor(auth=self._auth, domain=self._domain, throttler=self._throttler)
+        self._query_executor_read_only = GrapQLQueryExecutor(auth=self._auth_read_only, domain=self._domain, throttler=self._throttler)
 
         self._polkadex_order_type = {
             OrderType.MARKET: "MARKET",
@@ -172,8 +170,9 @@ class PolkadexDataSource:
             self._auth = gql.transport.appsync_auth.AppSyncJWTAuthentication(self.netloc_host, self._user_proxy_address)
         else:
             self._user_proxy_address = "READ_ONLY"
-            self._auth = gql.transport.appsync_auth.AppSyncJWTAuthentication(self.netloc_host, "READ_ONLY")
+            self._auth = self._auth_read_only
 
+        self._query_executor_read_only = GrapQLQueryExecutor(auth=self._auth_read_only, domain=self._domain, throttler=self._throttler)
         self._query_executor = GrapQLQueryExecutor(auth=self._auth, domain=self._domain, throttler=self._throttler)
         self.logger().info("Polkadex - Finished reinitiation")
 
@@ -211,7 +210,7 @@ class PolkadexDataSource:
         return await self._query_executor.list_open_orders_by_main_account(main_account=await self.user_main_address())
 
     async def assets_map(self) -> Dict[str, str]:
-        all_assets = await self._query_executor.all_assets()
+        all_assets = await self._query_executor_read_only.all_assets()
 
         self._assets_map = {
             asset["asset_id"]: polkadex_utils.normalized_asset_name(
@@ -229,7 +228,7 @@ class PolkadexDataSource:
         symbols_map = bidict()
         assets_map = await self.assets_map()
 
-        all_markets = await self._query_executor.all_markets()
+        all_markets = await self._query_executor_read_only.all_markets()
 
         for market_info in all_markets:
             try:
@@ -242,7 +241,7 @@ class PolkadexDataSource:
         return symbols_map
 
     async def all_trading_rules(self) -> List[TradingRule]:
-        all_markets = await self._query_executor.all_markets()
+        all_markets = await self._query_executor_read_only.all_markets()
 
         trading_rules = []
         for market_info in all_markets:
@@ -278,7 +277,7 @@ class PolkadexDataSource:
         return trading_rules
 
     async def order_book_snapshot(self, market_symbol: str, trading_pair: str) -> OrderBookMessage:
-        orderbook_items = await self._query_executor.get_orderbook(market_symbol)
+        orderbook_items = await self._query_executor_read_only.get_orderbook(market_symbol)
 
         timestamp = self._time()
         update_id = -1
@@ -317,7 +316,7 @@ class PolkadexDataSource:
         return self._user_main_address
 
     async def last_price(self, market_symbol: str) -> float:
-        recent_trade = await self._query_executor.recent_trade(market_symbol=market_symbol)
+        recent_trade = await self._query_executor_read_only.recent_trade(market_symbol=market_symbol)
         return float(recent_trade["p"])
 
     async def all_balances(self) -> List[Dict[str, Any]]:
