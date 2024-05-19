@@ -125,7 +125,7 @@ class MMMultiLevel(StrategyV2Base):
                                 spread=level['spread'],
                                 order_amount_quote=self.config.order_amount_quote * level['percent'],
                                 mid_price=self._mid_price,
-                                refeash_time=level['ttl'] + 5,
+                                refeash_time=level['ttl'] + 25,
                                 replace_time=30,
                                 level_id=level['id']
                             )

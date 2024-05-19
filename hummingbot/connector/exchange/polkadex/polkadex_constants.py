@@ -80,7 +80,7 @@ RATE_LIMITS = [
     ),
     RateLimit(
         limit_id=PLACE_ORDER_LIMIT_ID,
-        limit=2,
+        limit=10,
         time_interval=2,
     ),
     RateLimit(
