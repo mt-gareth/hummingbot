@@ -22,37 +22,52 @@ class MMMultiLevelConfig(StrategyV2ConfigBase):
         {
             'id': 'step-1',
             'spread': Decimal("0.005"),
-            'percent': Decimal("0.05"),
+            'percent': Decimal("0.04"),
             'ttl': 300,
         }, {
             'id': 'step-2',
             'spread': Decimal("0.0075"),
-            'percent': Decimal("0.07"),
+            'percent': Decimal("0.06"),
             'ttl': 420,
         }, {
             'id': 'step-3',
             'spread': Decimal("0.01"),
-            'percent': Decimal("0.13"),
+            'percent': Decimal("0.08"),
             'ttl': 530,
         }, {
             'id': 'step-4',
             'spread': Decimal("0.015"),
-            'percent': Decimal("0.15"),
+            'percent': Decimal("0.10"),
             'ttl': 640,
         }, {
             'id': 'step-5',
             'spread': Decimal("0.020"),
-            'percent': Decimal("0.17"),
+            'percent': Decimal("0.12"),
             'ttl': 750,
         }, {
             'id': 'step-6',
             'spread': Decimal("0.025"),
-            'percent': Decimal("0.18"),
+            'percent': Decimal("0.10"),
             'ttl': 860,
         }, {
             'id': 'step-7',
             'spread': Decimal("0.03"),
-            'percent': Decimal("0.25"),
+            'percent': Decimal("0.11"),
+            'ttl': 970,
+        }, {
+            'id': 'step-8',
+            'spread': Decimal("0.035"),
+            'percent': Decimal("0.12"),
+            'ttl': 970,
+        }, {
+            'id': 'step-9',
+            'spread': Decimal("0.04"),
+            'percent': Decimal("0.13"),
+            'ttl': 970,
+        }, {
+            'id': 'step-10',
+            'spread': Decimal("0.045"),
+            'percent': Decimal("0.14"),
             'ttl': 970,
         }]
 
