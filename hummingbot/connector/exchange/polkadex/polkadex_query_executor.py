@@ -1,7 +1,6 @@
 import asyncio
 import json
 import logging
-import sys
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, AsyncIterable, Callable, Dict, List, Optional
@@ -469,9 +468,7 @@ class GrapQLQueryExecutor(BaseQueryExecutor):
                     f"Unexpected error listening to order book updates from Polkadex. Error: {e}",
                     exc_info=True
                 )
-                sys.exit()
-                # TODO (dmitry): add proper handling of exceptions to all WS listeners
-                # await self.websocket_connect_failure()
+                await self.websocket_connect_failure()
 
     async def websocket_connect_failure(self):
         self.logger().info(f"Websocket connect failure.{self._websocket_failure}")
@@ -498,7 +495,6 @@ class GrapQLQueryExecutor(BaseQueryExecutor):
                     f"Unexpected error listening to public trades from Polkadex. Error: {e}",
                     exc_info=True
                 )
-                sys.exit()
                 await self.websocket_connect_failure()
 
     async def listen_to_private_events(self, events_handler: Callable, address: str):
@@ -513,7 +509,7 @@ class GrapQLQueryExecutor(BaseQueryExecutor):
                     f"Unexpected error listening to private updates from Polkadex. Error: {e}",
                     exc_info=True
                 )
-                sys.exit()
+                await self.websocket_connect_failure()
 
     async def _execute_query(
         self,

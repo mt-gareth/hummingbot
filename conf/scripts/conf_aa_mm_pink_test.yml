@@ -1,0 +1,7 @@
+markets:
+  polkadex:
+    - PINK-USDT
+candles_config: [ ]
+controllers_config: [ ]
+order_amount_quote: 20
+price_refresh_time: 15
