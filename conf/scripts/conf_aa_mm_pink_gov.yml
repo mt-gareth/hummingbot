@@ -3,5 +3,5 @@ markets:
     - PINK-USDT
 candles_config: [ ]
 controllers_config: [ ]
-order_amount_quote: 150
+order_amount_quote: 500
 price_refresh_time: 15
