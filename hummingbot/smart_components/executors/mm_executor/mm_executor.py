@@ -34,37 +34,14 @@ class MMExecutor(ExecutorBase):
                  update_interval: float = 1.0, max_retries: int = 10):
         super().__init__(strategy=strategy, config=config, connectors=[config.connector_name], update_interval=update_interval)
         self.config: MMExecutorConfig = config
-
-        # Order tracking
         self._open_order: Optional[TrackedOrder] = None
         self._failed_orders: List[TrackedOrder] = []
-
         self._mid_price = self.config.mid_price
-
         self._current_retries = 0
         self._max_retries = max_retries
-
         self._refresh_time = self.connector_timestamp()
         self.set_refresh_time(self.config.refeash_time)
-
-        """
-        type = "mm_executor"
-        trading_pair: str
-        connector_name: str
-        side: TradeType
-        spread: Decimal
-        order_amount_quote: Decimal
-        mid_price: Decimal
-        refeash_time: int
-        level_id: Optional[str] = None
-        """
-        """
-        We will be taking in a mid_price, spread, and amount and maintining an order a the price
-        if the order is filled we will replace the order after X amount of time
-        if the order is partially filled we wil replace the order after X amount of time
-        if the refresh time has been reached we will refresh the the order
-        if the mid_price has changed to put our order at a diffrent price then 2x our desired spread we will refresh the order immediatly
-        """
+        self._kill_time = self.connector_timestamp() + (self.config.refeash_time * 15)
 
     @property
     def entry_price(self) -> Decimal:
@@ -76,7 +53,9 @@ class MMExecutor(ExecutorBase):
 
     async def control_task(self):
         if self.status == SmartComponentStatus.RUNNING:
-            if not self._open_order:
+            if self.connector_timestamp() > self._kill_time:
+                self.early_stop()
+            elif not self._open_order:
                 self.place_open_order()
             elif self.connector_timestamp() > self._refresh_time:
                 self.renew_order()
