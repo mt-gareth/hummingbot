@@ -105,8 +105,8 @@ class MMMultiLevel(StrategyV2Base):
                 if self.executor_orchestrator.executors.get('main'):
                     for executor in self.executor_orchestrator.executors.get('main'):
                         executor.set_mid_price(self._mid_price)
-                active_buy_position_executors = self.filter_executors(executors=all_executors, filter_func=lambda x: x.side == TradeType.BUY)
-                active_sell_position_executors = self.filter_executors(executors=all_executors, filter_func=lambda x: x.side == TradeType.SELL)
+                active_buy_position_executors = self.filter_executors(executors=all_executors, filter_func=lambda x: x.side == TradeType.BUY and x.is_active)
+                active_sell_position_executors = self.filter_executors(executors=all_executors, filter_func=lambda x: x.side == TradeType.SELL and x.is_active)
                 # If there is already enough executors running just bail
                 if len(active_buy_position_executors) >= len(self.config.levels) and len(active_sell_position_executors) >= len(self.config.levels):
                     return create_actions
