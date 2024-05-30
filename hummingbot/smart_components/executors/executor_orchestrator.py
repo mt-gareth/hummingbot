@@ -14,6 +14,8 @@ from hummingbot.smart_components.executors.position_executor.data_types import P
 from hummingbot.smart_components.executors.position_executor.position_executor import PositionExecutor
 from hummingbot.smart_components.executors.twap_executor.data_types import TWAPExecutorConfig
 from hummingbot.smart_components.executors.twap_executor.twap_executor import TWAPExecutor
+from hummingbot.smart_components.executors.wash_executor.data_types import WashExecutorConfig
+from hummingbot.smart_components.executors.wash_executor.wash_executor import WashExecutor
 from hummingbot.smart_components.executors.xemm_executor.data_types import XEMMExecutorConfig
 from hummingbot.smart_components.executors.xemm_executor.xemm_executor import XEMMExecutor
 from hummingbot.smart_components.models.executor_actions import (
@@ -102,6 +104,8 @@ class ExecutorOrchestrator:
             executor = XEMMExecutor(self.strategy, executor_config, self.executors_update_interval)
         elif isinstance(executor_config, MMExecutorConfig):
             executor = MMExecutor(self.strategy, executor_config, self.executors_update_interval)
+        elif isinstance(executor_config, WashExecutorConfig):
+            executor = WashExecutor(self.strategy, executor_config, self.executors_update_interval)
         else:
             raise ValueError("Unsupported executor config type")
 

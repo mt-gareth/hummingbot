@@ -9,6 +9,7 @@ from hummingbot.connector.connector_base import ConnectorBase
 from hummingbot.core.clock import Clock
 from hummingbot.core.data_type.common import TradeType
 from hummingbot.smart_components.executors.mm_executor.data_types import MMExecutorConfig
+from hummingbot.smart_components.executors.wash_executor.data_types import WashExecutorConfig
 from hummingbot.smart_components.models.executor_actions import CreateExecutorAction, StopExecutorAction
 from hummingbot.strategy.strategy_v2_base import StrategyV2Base, StrategyV2ConfigBase
 
@@ -101,50 +102,64 @@ class MMMultiLevel(StrategyV2Base):
 
                 # Get active executors
                 all_executors = self.get_all_executors()
+                mm_executors = self.filter_executors(executors=all_executors, filter_func=lambda x: x.type == "mm_executor" and x.is_active)
+                wash_executor = self.filter_executors(executors=all_executors, filter_func=lambda x: x.type == "wash_executor" and x.is_active)
                 # pprint.pp(self.executor_orchestrator.executors)
                 if self.executor_orchestrator.executors.get('main'):
                     for executor in self.executor_orchestrator.executors.get('main'):
-                        executor.set_mid_price(self._mid_price)
-                active_buy_position_executors = self.filter_executors(executors=all_executors, filter_func=lambda x: x.side == TradeType.BUY and x.is_active)
-                active_sell_position_executors = self.filter_executors(executors=all_executors, filter_func=lambda x: x.side == TradeType.SELL and x.is_active)
+                        if executor.config.type == "mm_executor":
+                            executor.set_mid_price(self._mid_price)
+                active_buy_position_executors = self.filter_executors(executors=mm_executors, filter_func=lambda x: x.side == TradeType.BUY and x.is_active)
+                active_sell_position_executors = self.filter_executors(executors=mm_executors, filter_func=lambda x: x.side == TradeType.SELL and x.is_active)
                 # If there is already enough executors running just bail
-                if len(active_buy_position_executors) >= len(self.config.levels) and len(active_sell_position_executors) >= len(self.config.levels):
-                    return create_actions
-                for level in self.config.levels:
-                    # find current exicutor
-                    this_buy_executor = self.filter_executors(executors=active_buy_position_executors, filter_func=lambda x: x.custom_info["level_id"] == level['id'])
-                    if len(this_buy_executor) == 0:
-                        create_actions.append(CreateExecutorAction(
-                            executor_config=MMExecutorConfig(
-                                timestamp=self.current_timestamp,
-                                trading_pair=trading_pair,
-                                connector_name=connector_name,
-                                side=TradeType.BUY,
-                                spread=level['spread'],
-                                order_amount_quote=self.config.order_amount_quote * level['percent'],
-                                mid_price=self._mid_price,
-                                refeash_time=level['ttl'],
-                                replace_time=30,
-                                level_id=level['id']
-                            )
-                        ))
+                if len(active_buy_position_executors) < len(self.config.levels) or len(active_sell_position_executors) < len(self.config.levels):
+                    for level in self.config.levels:
+                        # find current exicutor
+                        this_buy_executor = self.filter_executors(executors=active_buy_position_executors, filter_func=lambda x: x.custom_info["level_id"] == level['id'])
+                        if len(this_buy_executor) == 0:
+                            create_actions.append(CreateExecutorAction(
+                                executor_config=MMExecutorConfig(
+                                    timestamp=self.current_timestamp,
+                                    trading_pair=trading_pair,
+                                    connector_name=connector_name,
+                                    side=TradeType.BUY,
+                                    spread=level['spread'],
+                                    order_amount_quote=self.config.order_amount_quote * level['percent'],
+                                    mid_price=self._mid_price,
+                                    refeash_time=level['ttl'],
+                                    replace_time=30,
+                                    level_id=level['id']
+                                )
+                            ))
 
-                    this_sell_executor = self.filter_executors(executors=active_sell_position_executors, filter_func=lambda x: x.custom_info["level_id"] == level['id'])
-                    if len(this_sell_executor) == 0:
-                        create_actions.append(CreateExecutorAction(
-                            executor_config=MMExecutorConfig(
-                                timestamp=self.current_timestamp,
-                                trading_pair=trading_pair,
-                                connector_name=connector_name,
-                                side=TradeType.SELL,
-                                spread=level['spread'],
-                                order_amount_quote=self.config.order_amount_quote * level['percent'],
-                                mid_price=self._mid_price,
-                                refeash_time=level['ttl'] + 25,
-                                replace_time=30,
-                                level_id=level['id']
-                            )
-                        ))
+                        this_sell_executor = self.filter_executors(executors=active_sell_position_executors, filter_func=lambda x: x.custom_info["level_id"] == level['id'])
+                        if len(this_sell_executor) == 0:
+                            create_actions.append(CreateExecutorAction(
+                                executor_config=MMExecutorConfig(
+                                    timestamp=self.current_timestamp,
+                                    trading_pair=trading_pair,
+                                    connector_name=connector_name,
+                                    side=TradeType.SELL,
+                                    spread=level['spread'],
+                                    order_amount_quote=self.config.order_amount_quote * level['percent'],
+                                    mid_price=self._mid_price,
+                                    refeash_time=level['ttl'] + 25,
+                                    replace_time=30,
+                                    level_id=level['id']
+                                )
+                            ))
+                if len(wash_executor) < 1:
+                    create_actions.append(CreateExecutorAction(
+                        executor_config=WashExecutorConfig(
+                            timestamp=self.current_timestamp,
+                            trading_pair=trading_pair,
+                            connector_name=connector_name,
+                            order_amount_min=2000,
+                            order_amount_max=5000,
+                            delay_min=45,
+                            delay_max=75
+                        )
+                    ))
         return create_actions
 
     def stop_actions_proposal(self) -> List[StopExecutorAction]:

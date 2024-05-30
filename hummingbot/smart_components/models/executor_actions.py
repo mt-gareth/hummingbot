@@ -4,10 +4,11 @@ from pydantic import BaseModel
 
 from hummingbot.smart_components.executors.arbitrage_executor.data_types import ArbitrageExecutorConfig
 from hummingbot.smart_components.executors.dca_executor.data_types import DCAExecutorConfig
+from hummingbot.smart_components.executors.mm_executor.data_types import MMExecutorConfig
 from hummingbot.smart_components.executors.position_executor.data_types import PositionExecutorConfig
 from hummingbot.smart_components.executors.twap_executor.data_types import TWAPExecutorConfig
+from hummingbot.smart_components.executors.wash_executor.data_types import WashExecutorConfig
 from hummingbot.smart_components.executors.xemm_executor.data_types import XEMMExecutorConfig
-from hummingbot.smart_components.executors.mm_executor.data_types import MMExecutorConfig
 
 
 class ExecutorAction(BaseModel):
@@ -21,7 +22,7 @@ class CreateExecutorAction(ExecutorAction):
     """
     Action to create an executor.
     """
-    executor_config: Union[PositionExecutorConfig, DCAExecutorConfig, XEMMExecutorConfig, ArbitrageExecutorConfig, TWAPExecutorConfig, MMExecutorConfig]
+    executor_config: Union[PositionExecutorConfig, DCAExecutorConfig, XEMMExecutorConfig, ArbitrageExecutorConfig, TWAPExecutorConfig, MMExecutorConfig, WashExecutorConfig]
 
 
 class StopExecutorAction(ExecutorAction):

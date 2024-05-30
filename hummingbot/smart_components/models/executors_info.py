@@ -7,8 +7,10 @@ from hummingbot.core.data_type.common import TradeType
 from hummingbot.smart_components.executors.arbitrage_executor.data_types import ArbitrageExecutorConfig
 from hummingbot.smart_components.executors.data_types import ExecutorConfigBase
 from hummingbot.smart_components.executors.dca_executor.data_types import DCAExecutorConfig
+from hummingbot.smart_components.executors.mm_executor.data_types import MMExecutorConfig
 from hummingbot.smart_components.executors.position_executor.data_types import PositionExecutorConfig
 from hummingbot.smart_components.executors.twap_executor.data_types import TWAPExecutorConfig
+from hummingbot.smart_components.executors.wash_executor.data_types import WashExecutorConfig
 from hummingbot.smart_components.executors.xemm_executor.data_types import XEMMExecutorConfig
 from hummingbot.smart_components.models.base import SmartComponentStatus
 from hummingbot.smart_components.models.executors import CloseType
@@ -21,7 +23,7 @@ class ExecutorInfo(BaseModel):
     close_timestamp: Optional[float]
     close_type: Optional[CloseType]
     status: SmartComponentStatus
-    config: Union[PositionExecutorConfig, XEMMExecutorConfig, ArbitrageExecutorConfig, DCAExecutorConfig, TWAPExecutorConfig, ExecutorConfigBase]
+    config: Union[PositionExecutorConfig, XEMMExecutorConfig, ArbitrageExecutorConfig, DCAExecutorConfig, TWAPExecutorConfig, ExecutorConfigBase, MMExecutorConfig, WashExecutorConfig]
     net_pnl_pct: Decimal
     net_pnl_quote: Decimal
     cum_fees_quote: Decimal
